@@ -1,4 +1,4 @@
-Vehicle,Blank1,All_MPG,Blank2,Combined_MPG,,City_MPG,HWY_MPG,Blank3,Text1,Text_city,Text_hwy,Fuel_Rate,Text2,Blank4,Annual_Fuel_Cost,MSRP,Car_Spec1,Car_Spec2,Total_Range
+Vehicle,Blank1,All_MPG,Blank2,Combined_MPG,MPG_Type,City_MPG,HWY_MPG,Blank3,Text1,Text_city,Text_hwy,Fuel_Rate,Text2,Blank4,Annual_Fuel_Cost,MSRP,Car_Spec1,Car_Spec2,Total_Range
 "2022 Tesla Model 3 RWDAutomatic (A1), Electricity",,132MPGe138126combined city/hwycityhwy25 kWh/100 mi,,132,MPGe,138,126,,combined city/hwy,city,hwy,25 kWh/100 mi,NA ,,$550,"$46,990",.1 barrels/yr,0 grams/mile, 272 milesTotal Range
 "2022 Tesla Model 3 Long Range AWDAutomatic (A1), Electricity",,131MPGe134126combined city/hwycityhwy26 kWh/100 mi,,131,MPGe,134,126,,combined city/hwy,city,hwy,26 kWh/100 mi,128.5,,$550,"$57,990",.1 barrels/yr,0 grams/mile, 358 milesTotal Range
 "2022 Lucid Air G Touring AWD w/19 inch wheelsAutomatic (A1), Electricity",,131MPGe130132combined city/hwycityhwy26 kWh/100 mi,,131,MPGe,130,132,,combined city/hwy,city,hwy,26 kWh/100 mi,NA ,,$550,"$95,000",.1 barrels/yr,0 grams/mile, 516 milesTotal Range
