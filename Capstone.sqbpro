@@ -1,15 +1,186 @@
-<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="C:/Users/chris/Code/SavvyCoders/Capstone/Capstone.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser query pragmas" current="2"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="125"/><column_width id="3" width="2528"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><current_table name="4,15:mainLuxuryCarBrands"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="LuxuryCarBrands" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="53"/><column index="2" value="172"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="SQL 1">select * from Vehicle_Data ORDER BY VehicleBrand
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="C:/Users/chris/Code/SavvyCoders/Capstone/Capstone.db" readonly="0" foreign_keys="" case_sensitive_like="" temp_store="" wal_autocheckpoint="" synchronous=""/><attached/><window><main_tabs open="structure browser query pragmas" current="2"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="125"/><column_width id="3" width="3190"/><column_width id="4" width="0"/></tab_structure><tab_browse><current_table name="0,0:"/><default_encoding codec=""/><browse_table_settings/></tab_browse><tab_sql><sql name="SQL 1">select VehicleModel, VehicleBrand, EngineType, AnnualMaintenanceCost,Annual_Fuel_Cost,MSRP, Year12Cost,CostDifference from Vehicle_Data
+
+select * from VehicleCost order by Vehicle
+
+select * from LuxuryCarBrands
+
+ALTER table Vehicle_Data
+rename column '12YearCost' to Year12Cost
+
+UPDATE Vehicle_Data
+SET AnnualMaintenanceCost = IIF(EngineType = 'Electric Vehicle',619,949)
+		
+select VehicleModel, VehicleBrand, 
+IIF(VehicleBrand in (SELECT BrandName from LuxuryCarBrands),'Yes','No') as IsLuxury
+from Vehicle_Data order by VehicleBrand
 
-select * from VehicleCost order by Vehicle
+select Vehicle, VehicleBrand, VehicleModel, Combined_MPG, EngineType, MSRP
+from Vehicle_Data
+where EngineType = 'Electric Vehicle' -- Regular Gasoline, Electric Vehicle, Hybrid
+and MSRP &lt;&gt; 0
+and Combined_MPG &gt; 30
+order by MSRP
 
-select * from LuxuryCarBrands
+-- Nissan Leaf (40 kW-hr battery pack)Automatic (A1)
+-- Kia Rio 1.6 L, 4 cyl, Automatic (AV-S1)
+-- Hyundai Ioniq Blue 1.6 L, 4 cyl, Automatic (AM-S6)
 
-ALTER table Vehicle_Data
-add column IsLuxuryBrand TEXT
+create table Annual_Maintenance_Cost (
+VehicleType TEXT,
+AnnualMaintenanceCost INT )
 
-UPDATE Vehicle_Data
-SET IsLuxuryBrand = IIF(VehicleBrand in (SELECT BrandName from LuxuryCarBrands),'Yes','No')
+INSERT into Annual_Maintenance_Cost (VehicleType,AnnualMaintenanceCost)
+VALUES
+(&quot;Regular Gasoline&quot;,949),
+(&quot;Electric Vehicle&quot;,619),
+(&quot;Hybrid&quot;,949)
+
+select * from Annual_Maintenance_Cost
+
+select a.VehicleBrand, a.VehicleModel, a.MSRP, a.Annual_Fuel_Cost, a.AnnualMaintenanceCost, a.EngineType
+from Vehicle_Data  a
+
+select a.Vehicle, a.PaymentYear, a.TotalPayment, b.MSRP, b.AnnualMaintenanceCost,
+b.Annual_Fuel_Cost
+from Vehicle_Cost a
+join Vehicle_Data b on b.Vehicle = a.Vehicle
+
+select VehicleBrand, VehicleModel, EngineType, msrp
+from Vehicle_Data
+where IsLuxuryBrand = 'No'
+order by VehicleBrand, VehicleModel
+
+select msrp, RebateMSRP, EngineType, * from Vehicle_Data order by VehicleModel
+
+ALTER table Vehicle_Rebate_Cost
+add column VehicleBrand TEXT
 		
-select VehicleModel, VehicleBrand, 
-IIF(VehicleBrand in (SELECT BrandName from LuxuryCarBrands),'Yes','No') as IsLuxury
-from Vehicle_Data order by VehicleBrand</sql><current_tab id="0"/></tab_sql></sqlb_project>
+UPDATE Vehicle_Data
+SET '12YearCost' = Annual_Fuel_Cost*12+AnnualMaintenanceCost*12+MSRP
+
+select AnnualMaintenanceCost,Annual_Fuel_Cost,MSRP, Year12Cost from Vehicle_Data
+7428
+------------------------------------------------
+insert into Vehicle_Average_Cost (VehicleType,CostAvg)
+VALUES
+('Regular Gasoline',(select avg(Year12Cost)
+from Vehicle_Data
+where msrp &gt; 0
+and EngineType = 'Regular Gasoline' and msrp &lt; 50000 and Combined_MPG &gt;=30))
+
+-- Regular Gasoline, Electric Vehicle, Hybrid
+
+select * from Vehicle_Average_Cost
+
+CREATE table Vehicle_Average_Cost (
+VehicleType TEXT,
+CostAvg INT
+)
+
+
+
+
+drop table Vehicle_Rebate_Cost
+
+create table Vehicle_Rebate_Cost (
+Vehicle TEXT,
+PaymentYear INT,
+TotalPayment INT)
+5571+5400
+select msrp, AnnualMaintenanceCost, Annual_Fuel_Cost from Vehicle_Data where VehicleModel = 'Kona ElectricAutomatic (A1)'
+
+INSERT into Vehicle_Rebate_Cost (Vehicle,PaymentYear, TotalPayment)
+VALUES
+(&quot;Hyundai Kona ElectricAutomatic (A1)&quot;,1,(select ((msrp-7500)/5)*1+Annual_Fuel_Cost*1+AnnualMaintenanceCost*1 from Vehicle_Data where VehicleModel = 'Kona ElectricAutomatic (A1)')),
+(&quot;Hyundai Kona ElectricAutomatic (A1)&quot;,2,(select ((msrp-7500)/5)*2+Annual_Fuel_Cost*2+AnnualMaintenanceCost*2 from Vehicle_Data where VehicleModel = 'Kona ElectricAutomatic (A1)')),
+(&quot;Hyundai Kona ElectricAutomatic (A1)&quot;,3,(select ((msrp-7500)/5)*3+Annual_Fuel_Cost*3+AnnualMaintenanceCost*3 from Vehicle_Data where VehicleModel = 'Kona ElectricAutomatic (A1)')),
+(&quot;Hyundai Kona ElectricAutomatic (A1)&quot;,4,(select ((msrp-7500)/5)*4+Annual_Fuel_Cost*4+AnnualMaintenanceCost*4 from Vehicle_Data where VehicleModel = 'Kona ElectricAutomatic (A1)')),
+(&quot;Hyundai Kona ElectricAutomatic (A1)&quot;,5,(select (msrp-7500)+Annual_Fuel_Cost*5+AnnualMaintenanceCost*5 from Vehicle_Data where VehicleModel = 'Kona ElectricAutomatic (A1)')),
+(&quot;Hyundai Kona ElectricAutomatic (A1)&quot;,6,(select (msrp-7500)+Annual_Fuel_Cost*6+AnnualMaintenanceCost*6 from Vehicle_Data where VehicleModel = 'Kona ElectricAutomatic (A1)')),
+(&quot;Hyundai Kona ElectricAutomatic (A1)&quot;,7,(select (msrp-7500)+Annual_Fuel_Cost*7+AnnualMaintenanceCost*7 from Vehicle_Data where VehicleModel = 'Kona ElectricAutomatic (A1)')),
+(&quot;Hyundai Kona ElectricAutomatic (A1)&quot;,8,(select (msrp-7500)+Annual_Fuel_Cost*8+AnnualMaintenanceCost*8 from Vehicle_Data where VehicleModel = 'Kona ElectricAutomatic (A1)')),
+(&quot;Hyundai Kona ElectricAutomatic (A1)&quot;,9,(select (msrp-7500)+Annual_Fuel_Cost*9+AnnualMaintenanceCost*9 from Vehicle_Data where VehicleModel = 'Niro ElectricAutomatic (A1)')),
+(&quot;Hyundai Kona ElectricAutomatic (A1)&quot;,10,(select (msrp-7500)+Annual_Fuel_Cost*10+AnnualMaintenanceCost*10 from Vehicle_Data where VehicleModel = 'Kona ElectricAutomatic (A1)')),
+(&quot;Hyundai Kona ElectricAutomatic (A1)&quot;,11,(select (msrp-7500)+Annual_Fuel_Cost*11+AnnualMaintenanceCost*11 from Vehicle_Data where VehicleModel = 'Kona ElectricAutomatic (A1)')),
+(&quot;Hyundai Kona ElectricAutomatic (A1)&quot;,12,(select (msrp-7500)+Annual_Fuel_Cost*12+AnnualMaintenanceCost*12 from Vehicle_Data where VehicleModel = 'Kona ElectricAutomatic (A1)')),
+(&quot;Kia Niro ElectricAutomatic (A1)&quot;,1,(select ((msrp-7500)/5)*1+Annual_Fuel_Cost*1+AnnualMaintenanceCost*1 from Vehicle_Data where VehicleModel = 'Niro ElectricAutomatic (A1)')),
+(&quot;Kia Niro ElectricAutomatic (A1)&quot;,2,(select ((msrp-7500)/5)*2+Annual_Fuel_Cost*2+AnnualMaintenanceCost*2 from Vehicle_Data where VehicleModel = 'Niro ElectricAutomatic (A1)')),
+(&quot;Kia Niro ElectricAutomatic (A1)&quot;,3,(select ((msrp-7500)/5)*3+Annual_Fuel_Cost*3+AnnualMaintenanceCost*3 from Vehicle_Data where VehicleModel = 'Niro ElectricAutomatic (A1)')),
+(&quot;Kia Niro ElectricAutomatic (A1)&quot;,4,(select ((msrp-7500)/5)*4+Annual_Fuel_Cost*4+AnnualMaintenanceCost*4 from Vehicle_Data where VehicleModel = 'Niro ElectricAutomatic (A1)')),
+(&quot;Kia Niro ElectricAutomatic (A1)&quot;,5,(select (msrp-7500)+Annual_Fuel_Cost*5+AnnualMaintenanceCost*5 from Vehicle_Data where VehicleModel = 'Niro ElectricAutomatic (A1)')),
+(&quot;Kia Niro ElectricAutomatic (A1)&quot;,6,(select (msrp-7500)+Annual_Fuel_Cost*6+AnnualMaintenanceCost*6 from Vehicle_Data where VehicleModel = 'Niro ElectricAutomatic (A1)')),
+(&quot;Kia Niro ElectricAutomatic (A1)&quot;,7,(select (msrp-7500)+Annual_Fuel_Cost*7+AnnualMaintenanceCost*7 from Vehicle_Data where VehicleModel = 'Niro ElectricAutomatic (A1)')),
+(&quot;Kia Niro ElectricAutomatic (A1)&quot;,8,(select (msrp-7500)+Annual_Fuel_Cost*8+AnnualMaintenanceCost*8 from Vehicle_Data where VehicleModel = 'Niro ElectricAutomatic (A1)')),
+(&quot;Kia Niro ElectricAutomatic (A1)&quot;,9,(select (msrp-7500)+Annual_Fuel_Cost*9+AnnualMaintenanceCost*9 from Vehicle_Data where VehicleModel = 'Niro ElectricAutomatic (A1)')),
+(&quot;Kia Niro ElectricAutomatic (A1)&quot;,10,(select (msrp-7500)+Annual_Fuel_Cost*10+AnnualMaintenanceCost*10 from Vehicle_Data where VehicleModel = 'Niro ElectricAutomatic (A1)')),
+(&quot;Kia Niro ElectricAutomatic (A1)&quot;,11,(select (msrp-7500)+Annual_Fuel_Cost*11+AnnualMaintenanceCost*11 from Vehicle_Data where VehicleModel = 'Niro ElectricAutomatic (A1)')),
+(&quot;Kia Niro ElectricAutomatic (A1)&quot;,12,(select (msrp-7500)+Annual_Fuel_Cost*12+AnnualMaintenanceCost*12 from Vehicle_Data where VehicleModel = 'Niro ElectricAutomatic (A1)'))
+
+-- &quot;Hyundai Kona ElectricAutomatic (A1)&quot; Kia Niro ElectricAutomatic (A1)
+select* from Vehicle_Rebate_Cost
+
+
+UPDATE Vehicle_Rebate_Cost
+SET VehicleBrand = 'Kia' where Vehicle like 'Kia%'
+
+
+
+UPDATE Vehicle_Rebate_Cost
+set TotalPayment = 45971
+where vehicle = 'Hyundai Kona ElectricAutomatic (A1) - Rebate' and PaymentYear = 9
+
+select * from Vehicle_Rebate_Cost
+
+INSERT into Vehicle_Rebate_Cost (Vehicle,PaymentYear, TotalPayment)
+VALUES
+('Kia Niro Touring 1.6 L, 4 cyl, Automatic (AM-S6)',1,(select TotalPayment from Vehicle_Cost where PaymentYear = 1 and Vehicle = 'Kia Niro Touring 1.6 L, 4 cyl, Automatic (AM-S6)')),
+('Kia Niro Touring 1.6 L, 4 cyl, Automatic (AM-S6)',2,(select TotalPayment from Vehicle_Cost where PaymentYear = 2 and Vehicle = 'Kia Niro Touring 1.6 L, 4 cyl, Automatic (AM-S6)')),
+('Kia Niro Touring 1.6 L, 4 cyl, Automatic (AM-S6)',3,(select TotalPayment from Vehicle_Cost where PaymentYear = 3 and Vehicle = 'Kia Niro Touring 1.6 L, 4 cyl, Automatic (AM-S6)')),
+('Kia Niro Touring 1.6 L, 4 cyl, Automatic (AM-S6)',4,(select TotalPayment from Vehicle_Cost where PaymentYear = 4 and Vehicle = 'Kia Niro Touring 1.6 L, 4 cyl, Automatic (AM-S6)')),
+('Kia Niro Touring 1.6 L, 4 cyl, Automatic (AM-S6)',5,(select TotalPayment from Vehicle_Cost where PaymentYear = 5 and Vehicle = 'Kia Niro Touring 1.6 L, 4 cyl, Automatic (AM-S6)')),
+('Kia Niro Touring 1.6 L, 4 cyl, Automatic (AM-S6)',6,(select TotalPayment from Vehicle_Cost where PaymentYear = 6 and Vehicle = 'Kia Niro Touring 1.6 L, 4 cyl, Automatic (AM-S6)')),
+('Kia Niro Touring 1.6 L, 4 cyl, Automatic (AM-S6)',7,(select TotalPayment from Vehicle_Cost where PaymentYear = 7 and Vehicle = 'Kia Niro Touring 1.6 L, 4 cyl, Automatic (AM-S6)')),
+('Kia Niro Touring 1.6 L, 4 cyl, Automatic (AM-S6)',8,(select TotalPayment from Vehicle_Cost where PaymentYear = 8 and Vehicle = 'Kia Niro Touring 1.6 L, 4 cyl, Automatic (AM-S6)')),
+('Kia Niro Touring 1.6 L, 4 cyl, Automatic (AM-S6)',9,(select TotalPayment from Vehicle_Cost where PaymentYear = 9 and Vehicle = 'Kia Niro Touring 1.6 L, 4 cyl, Automatic (AM-S6)')),
+('Kia Niro Touring 1.6 L, 4 cyl, Automatic (AM-S6)',10,(select TotalPayment from Vehicle_Cost where PaymentYear = 10 and Vehicle = 'Kia Niro Touring 1.6 L, 4 cyl, Automatic (AM-S6)')),
+('Kia Niro Touring 1.6 L, 4 cyl, Automatic (AM-S6)',11,(select TotalPayment from Vehicle_Cost where PaymentYear = 11 and Vehicle = 'Kia Niro Touring 1.6 L, 4 cyl, Automatic (AM-S6)')),
+('Kia Niro Touring 1.6 L, 4 cyl, Automatic (AM-S6)',12,(select TotalPayment from Vehicle_Cost where PaymentYear = 12 and Vehicle = 'Kia Niro Touring 1.6 L, 4 cyl, Automatic (AM-S6)'))
+
+Hyundai Kona FWD 1.6 L, 4 cyl, Automatic (AM-S7), Turbo
+Hyundai Kona ElectricAutomatic (A1)
+Kia Niro ElectricAutomatic (A1)
+Kia Niro Touring 1.6 L, 4 cyl, Automatic (AM-S6)
+
+
+delete from Vehicle_Rebate_Cost where Vehicle = 'Hyundai Kona FWD 1.6 L, 4 cyl, Automatic (AM-S7), Turbo'
+
+----------------------------------------------------------------------------
+
+ALTER TABLE Vehicle_Data
+ADD column CostDifference INTEGER
+
+insert into Vehicle_Average_Cost (VehicleType,CostAvg)
+VALUES
+('Regular Gasoline',(select avg(Year12Cost)
+from Vehicle_Data
+where msrp &gt; 0
+and EngineType = 'Regular Gasoline' and msrp &lt; 50000 and Combined_MPG &gt;=30))
+
+-- Regular Gasoline, Electric Vehicle, Hybrid
+
+UPDATE Vehicle_Data set CostDifference = 
+CASE 
+	WHEN EngineType = 'Electric Vehicle'
+		THEN ((Year12Cost -(select CostAvg from Vehicle_Average_Cost where VehicleType = 'Regular Gasoline'))
+	WHEN EngineType ='Regular Gasoline'
+		THEN ((Year12Cost)-(select CostAvg from Vehicle_Average_Cost where VehicleType = 'Electric Vehicle'))
+	WHEN EngineType = 'Hybrid'
+		THEN ((Year12Cost) -(select CostAvg from Vehicle_Average_Cost where VehicleType = 'Electric Vehicle'))
+		END
+		
+select VehicleModel, VehicleBrand, EngineType, AnnualMaintenanceCost,Annual_Fuel_Cost,MSRP, Year12Cost,CostDifference from Vehicle_Data
+where VehicleModel like 'leaf%'
+
+select  from Vehicle_Data where VehicleModel like 'corolla%'
+select * from Vehicle_Cost
+</sql><current_tab id="0"/></tab_sql></sqlb_project>
